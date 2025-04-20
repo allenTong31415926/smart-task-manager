@@ -1,12 +1,45 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from .backends import CustomModelBackend
 
-# LoginView is no longer needed as we're using TokenObtainPairView
-# You can add other user-related views here, such as:
-# - User registration
-# - User profile management
-# - Password reset
-# etc.
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            # Create an instance of our custom backend
+            backend = CustomModelBackend()
+            user = backend.authenticate(
+                request=self.context.get('request'),
+                username=username,
+                password=password
+            )
+
+            if not user:
+                msg = 'Unable to log in with provided credentials.'
+                raise serializers.ValidationError(msg, code='authorization')
+
+            refresh = self.get_token(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+            return data
+
+        msg = 'Must include "username" and "password".'
+        raise serializers.ValidationError(msg, code='authorization')
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        refresh = RefreshToken(attrs['refresh'])
+        data = {'access': str(refresh.access_token)}
+        return data
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
