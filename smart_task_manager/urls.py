@@ -18,5 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('users/', include('users.urls')),
+    path('auth/', include('users.urls')),  # Change 'users/' to 'auth/' for more RESTful paths
+    path('', include('tasks.urls')),  # Remove 'tasks/' prefix for more RESTful paths
 ]
