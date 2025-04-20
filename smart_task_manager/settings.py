@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
+    'tasks',
 ]
 
 MIDDLEWARE = [
@@ -110,8 +111,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'smart_task_manager',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'USER': 'allen',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '5432',
     }
