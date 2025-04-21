@@ -1,0 +1,6 @@
+<h2>Weekly Task Summary</h2>
+<ul>
+  {% for day, count in weekly_summary.items %}
+    <li>{{ day }}: {{ count }} tasks</li>
+  {% endfor %}
+</ul>

@@ -23,4 +23,5 @@ urlpatterns = [
     path('tags/', include('tags.urls')),
     path('analytics/', include('analytics.urls')),
     path('exports/', include('exports.urls')),
+    path('', include('web.urls')),
 ]
