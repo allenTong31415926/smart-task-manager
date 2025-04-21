@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'tasks',
     'tags',
+    'analytics',
 ]
 
 MIDDLEWARE = [
