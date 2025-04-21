@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
-from .serializers import CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer
+from users.serializers import CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer
 
 User = get_user_model()
 
@@ -92,4 +92,4 @@ class TestTokenSerializers:
         assert refresh_serializer.is_valid() is True
         data = refresh_serializer.validated_data
 
-        assert 'access' in data
+        assert 'access' in data 

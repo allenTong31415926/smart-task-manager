@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
-from .models import Project, Task
-from .permissions import IsOwnerOrReadOnly, IsTaskAssigneeOrProjectOwner
+from tasks.models import Project, Task
+from tasks.permissions import IsOwnerOrReadOnly, IsTaskAssigneeOrProjectOwner
 
 User = get_user_model()
 

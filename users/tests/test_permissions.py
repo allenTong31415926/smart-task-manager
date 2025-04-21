@@ -1,5 +1,5 @@
 import pytest
-from .permissions import IsAdmin
+from users.permissions import IsAdmin
 
 @pytest.mark.django_db
 class TestPermissions:
