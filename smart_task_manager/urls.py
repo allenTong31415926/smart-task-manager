@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('auth/', include('users.urls')),  # Change 'users/' to 'auth/' for more RESTful paths
     path('', include('tasks.urls')),  # Remove 'tasks/' prefix for more RESTful paths
+    path('tags', include('tags.urls')),
 ]
