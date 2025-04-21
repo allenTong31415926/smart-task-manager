@@ -1,0 +1,16 @@
+<h2>Dashboard</h2>
+<p>Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
+
+<h3>Your Tasks</h3>
+<ul>
+  {% for task in tasks %}
+    <li>{{ task.title }} - {{ task.status }}</li>
+  {% endfor %}
+</ul>
+
+<h3>Your Projects</h3>
+<ul>
+  {% for project in projects %}
+    <li>{{ project.name }}</li>
+  {% endfor %}
+</ul>
