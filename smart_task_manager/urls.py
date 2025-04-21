@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('tasks.urls')),  # Remove 'tasks/' prefix for more RESTful paths
     path('tags/', include('tags.urls')),
     path('analytics/', include('analytics.urls')),
+    path('exports/', include('exports.urls')),
 ]

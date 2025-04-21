@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'tags',
     'analytics',
     'django_celery_beat',
-    'notifications'
+    'notifications',
+    'exports',
 ]
 
 MIDDLEWARE = [
