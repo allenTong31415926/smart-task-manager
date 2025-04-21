@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
-from .models import Project, Task
-from .serializers import ProjectSerializer, TaskSerializer
+from tasks.models import Project, Task
+from tasks.serializers import ProjectSerializer, TaskSerializer
 from datetime import date
 
 User = get_user_model()

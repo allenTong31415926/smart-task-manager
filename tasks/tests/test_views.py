@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from .models import Project, Task
+from tasks.models import Project, Task
 from datetime import date
 
 @pytest.mark.django_db
