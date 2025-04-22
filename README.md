@@ -29,6 +29,8 @@ This project was built to gain practical experience with:
   - Test client and API client
   - Mock objects and test isolation
   - Coverage reporting
+  - Template testing
+  - Integration testing
 
 - **Modern Python Development**
   - Type hints and annotations
@@ -66,10 +68,40 @@ smart_task_manager/
 ├── exports/         # Export functionality
 ├── notifications/   # Email notifications
 ├── tasks/          # Core task management
+├── templates/      # Project-wide HTML templates
 ├── users/          # Custom user management
 ├── web/            # Web interface
 └── smart_task_manager/  # Project settings
 ```
+
+## Testing Structure
+
+The project includes comprehensive testing at multiple levels:
+
+### Template Tests
+Located in `web/tests/test_templates.py`, these tests verify:
+- Login form rendering and error handling
+- Dashboard content and task display
+- Analytics page with task statistics
+- Common elements across templates
+- User-specific content display
+
+### View Tests
+- Authentication and authorization
+- Form submission handling
+- Data display and context
+- Response status codes
+
+### Model Tests
+- Data integrity
+- Model relationships
+- Field validations
+- Custom methods
+
+### Integration Tests
+- End-to-end workflows
+- Cross-component functionality
+- User interactions
 
 ## Development Setup
 
@@ -117,6 +149,13 @@ celery -A smart_task_manager beat -l info
 Run the test suite:
 ```bash
 pytest
+```
+
+Run specific test categories:
+```bash
+pytest web/tests/test_templates.py  # Run template tests
+pytest web/tests/test_views.py      # Run view tests
+pytest tasks/tests/test_models.py   # Run model tests
 ```
 
 Generate coverage report:
