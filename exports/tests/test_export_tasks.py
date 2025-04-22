@@ -8,7 +8,7 @@ from datetime import date
 User = get_user_model()
 
 @pytest.mark.django_db
-class TestTasks:
+class TestExportTasks:
     def setup_method(self):
         # Create test user
         self.user = User(
