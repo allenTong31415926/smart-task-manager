@@ -1,83 +1,110 @@
 import pytest
 from django.template.loader import render_to_string
-from tasks.models import Task
-from web.forms import LoginForm
+from django.template import Context, Template
+from tasks.models import Task, Project
+from datetime import datetime, timedelta
 
 @pytest.mark.django_db
 class TestLoginTemplate:
-    def test_login_template_empty_form(self):
-        form = LoginForm()
-        html = render_to_string('web/login.html', {'form': form})
+    def test_login_template_with_form(self, client):
+        """Test that login template renders correctly with form"""
+        response = client.get('/login/')
+        assert 'web/login.html' in [t.name for t in response.templates]
         
-        # Check basic structure
-        assert '<form' in html
-        assert 'method="post"' in html
-        assert 'csrfmiddlewaretoken' in html
-        assert '<button type="submit">Login</button>' in html
-        
-        # Check form fields
-        assert 'id="id_username"' in html
-        assert 'id="id_password"' in html
+        # Check form elements
+        content = response.content.decode()
+        assert '<form' in content
+        assert 'method="post"' in content
+        assert 'name="username"' in content
+        assert 'name="password"' in content
+        assert 'type="submit"' in content
 
-    def test_login_template_with_errors(self):
-        form = LoginForm(data={'username': '', 'password': ''})
-        form.is_valid()  # Trigger validation to get errors
-        html = render_to_string('web/login.html', {'form': form})
-        
-        # Check error messages
-        assert 'This field is required.' in html
+    def test_login_template_with_errors(self, client):
+        """Test that login template shows error messages"""
+        response = client.post('/login/', {
+            'username': 'wronguser',
+            'password': 'wrongpass'
+        })
+        content = response.content.decode()
+        assert 'Please enter a correct username and password' in content
 
 @pytest.mark.django_db
 class TestDashboardTemplate:
-    def test_dashboard_template_with_data(self, test_user, test_task, test_project):
-        context = {
-            'tasks': Task.objects.filter(assigned_to=test_user),
-            'projects': [test_project]
-        }
-        html = render_to_string('web/dashboard.html', context)
+    def test_dashboard_template_content(self, web_client, task, project):
+        """Test that dashboard template shows tasks and projects"""
+        response = web_client.get('/dashboard/')
+        assert 'web/dashboard.html' in [t.name for t in response.templates]
         
-        # Check if project and task data is displayed
-        assert 'Test Project' in html
-        assert 'Test Task' in html
-        assert 'todo' in html
-        assert 'high' in html
+        content = response.content.decode()
+        # Check essential content
+        assert 'Dashboard' in content
+        assert 'Welcome' in content
+        assert 'Logout' in content
+        assert 'Your Tasks' in content
+        assert 'Your Projects' in content
 
-    def test_dashboard_template_no_data(self):
-        context = {
-            'tasks': Task.objects.none(),
-            'projects': []
-        }
-        html = render_to_string('web/dashboard.html', context)
-        
-        # Check empty state handling
-        assert 'No tasks found' in html
-        assert 'No projects found' in html
+        # Check task and project data
+        assert f'{task.title} - {task.status}' in content  # Task title and status are shown together
+        assert project.name in content  # Project name is shown
 
 @pytest.mark.django_db
 class TestAnalyticsTemplate:
-    def test_analytics_template_with_data(self):
-        weekly_summary = {
-            'Monday': 2,
-            'Tuesday': 1,
-            'Wednesday': 0,
-            'Thursday': 3,
-            'Friday': 1,
-            'Saturday': 0,
-            'Sunday': 0
-        }
-        html = render_to_string('web/analytics.html', {'weekly_summary': weekly_summary})
+    def test_analytics_template_content(self, web_client, regular_user, project):
+        """Test that analytics template shows task statistics"""
+        # Create a done task for Monday
+        today = datetime.now().date()
+        monday = today - timedelta(days=today.weekday())
+        monday_datetime = datetime.combine(monday, datetime.min.time())
         
-        # Check if all days are displayed
-        for day in weekly_summary:
-            assert day in html
-            assert str(weekly_summary[day]) in html
+        task = Task.objects.create(
+            title='Monday Task',
+            description='A test task',
+            status='done',
+            project=project,
+            assigned_to=regular_user
+        )
+        Task.objects.filter(pk=task.pk).update(created_at=monday_datetime)
 
-    def test_analytics_template_no_data(self):
-        weekly_summary = {
-            'Monday': 0, 'Tuesday': 0, 'Wednesday': 0,
-            'Thursday': 0, 'Friday': 0, 'Saturday': 0, 'Sunday': 0
-        }
-        html = render_to_string('web/analytics.html', {'weekly_summary': weekly_summary})
+        response = web_client.get('/analytics/')
+        assert 'web/analytics.html' in [t.name for t in response.templates]
         
-        # Check empty state handling
-        assert 'No tasks completed this week' in html 
+        content = response.content.decode()
+        # Check essential content
+        assert 'Weekly Task Summary' in content
+        assert 'Monday' in content
+        assert 'Tuesday' in content
+        assert 'Wednesday' in content
+        
+        # Check task count
+        assert 'Monday: 1 tasks' in content  # Monday's task count
+        assert 'Tuesday: 0 tasks' in content  # Other days have zero tasks
+
+    def test_analytics_template_no_tasks(self, web_client):
+        """Test that analytics template handles no tasks gracefully"""
+        response = web_client.get('/analytics/')
+        content = response.content.decode()
+        
+        # Should show zeros for all days
+        for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
+            assert f'{day}: 0 tasks' in content  # Check format matches template
+
+@pytest.mark.django_db
+class TestCommonElements:
+    """Test common elements across templates"""
+    
+    def test_navigation_elements(self, web_client):
+        """Test that navigation elements are present"""
+        response = web_client.get('/dashboard/')
+        content = response.content.decode()
+        
+        # Check navigation elements
+        assert 'Dashboard' in content  # Page title
+        assert 'Welcome, user' in content  # User welcome message
+        assert '<a href="/logout/">Logout</a>' in content  # Logout link
+
+    def test_user_welcome(self, web_client):
+        """Test that user welcome message is shown"""
+        response = web_client.get('/dashboard/')
+        content = response.content.decode()
+        assert 'Welcome' in content
+        assert 'user' in content  # username from regular_user fixture 

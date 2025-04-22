@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from django.test import Client
 from django.db import connection
 from tasks.models import Project, Task
 from tags.models import Tag
@@ -17,6 +18,11 @@ def db_setup():
 @pytest.fixture
 def api_client():
     return APIClient()
+
+@pytest.fixture
+def web_client(client, regular_user):
+    client.login(username='user', password='userpass123')
+    return client
 
 @pytest.fixture
 def admin_user():
@@ -55,18 +61,19 @@ def admin_client(api_client, admin_user):
 @pytest.fixture
 def project(regular_user):
     return Project.objects.create(
-        title='Test Project',
+        name='Test Project',
         description='A test project',
         owner=regular_user
     )
 
 @pytest.fixture
-def task(project):
+def task(project, regular_user):
     return Task.objects.create(
         title='Test Task',
         description='A test task',
         project=project,
-        owner=project.owner
+        assigned_to=regular_user,
+        status='todo'
     )
 
 @pytest.fixture
